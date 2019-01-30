@@ -831,6 +831,7 @@ class Omega():
             advanced_status = ''
             if 'O97 U25 D0' in line:
                 self._logger.info('ADVANCED: SPLICE START')
+                self.enqueueCmd("O68 D2")  # Queue Switch Status
                 if self.FeedrateControl:
                     self._logger.info('ADVANCED: Feed-rate Control: ACTIVATED')
                     advanced_status = 'Slice Starting: Speed -> SLOW(%s)' % self.FeedrateSlowPct
@@ -855,6 +856,7 @@ class Omega():
                     self._logger.info('ADVANCED: Feed-rate Control: INACTIVE')
                     self.updateUI()
             if 'O97 U25 D1' in line:
+                self.enqueueCmd("O68 D2")  # Queue Switch Status
                 self._logger.info('ADVANCED: SPLICE END')
                 if self.FeedrateControl:
                     self._logger.info('ADVANCED: Feed-rate NORMAL - ACTIVE (%s)' % self.FeedrateNormalPct)
@@ -877,7 +879,7 @@ class Omega():
                     idx = line.find("O34")
                     parms = line[idx+7:].split(" ")
                     try:
-                        self._printer.commands("M117 Ping {} {}pct".format(str(int(parms[1][1:],16)), parms[0][1:]))
+                        self._printer.commands("M117 Ping {} {}pct".format(str(int(parms[1][1:], 16)), parms[0][1:]))
                         self.updateUI()
                     except ValueError:
                         self._printer.commands("M117 {}".format(line[idx+7:]))
@@ -929,7 +931,6 @@ class Omega():
                     self._plugin_manager.send_plugin_message(self._identifier, "ADVANCED:UISWITCHES=%s" % switch_status)
             if advanced_status != '':
                 self._plugin_manager.send_plugin_message(self._identifier, "ADVANCED:UIMESSAGE=%s" % advanced_status)
-                self.enqueueCmd("O68 D2")  # Queue Switch Status
 
         except Exception as e:
             # Something went wrong with the connection to Palette2
